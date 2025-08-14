@@ -17,7 +17,9 @@ camera:
   yaw_compensation: 0.0
   z_compensation: 0.0
 detection_model:
-  model_path: "./src/vision/model/best_orin.engine"  # switch to  "./src/vision/model/best_orin_10.3.engine" if u on jetpack 6.2
+  # Please change this to the model of your GPU, if you don't know which GPU or you dont have a engine file
+  # Please follow the docs to generate one a place it src/vision/model
+  model_path: "./src/vision/model/model.engine"  # switch to  "./src/vision/model/best_orin_10.3.engine" if u on jetpack 6.2
   confidence_threshold: 0.2
 use_depth: true
 ball_pose_estimator:

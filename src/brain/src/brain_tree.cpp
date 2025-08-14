@@ -726,12 +726,12 @@ NodeStatus SelfLocate::tick()
     if (false)
     {
         brain->log->setTimeNow();
-        brain->log->log("locator/time",
-                        rerun::Scalar(res.msecs));
-        brain->log->log("locator/residual",
-                        rerun::Scalar(res.residual));
-        brain->log->log("locator/result",
-                        rerun::Scalar(res.code));
+    brain->log->log("locator/time",
+            rerun::Scalars(rerun::Collection<rerun::components::Scalar>{rerun::components::Scalar(res.msecs)}));
+    brain->log->log("locator/residual",
+            rerun::Scalars(rerun::Collection<rerun::components::Scalar>{rerun::components::Scalar(res.residual)}));
+    brain->log->log("locator/result",
+            rerun::Scalars(rerun::Collection<rerun::components::Scalar>{rerun::components::Scalar(res.code)}));
         brain->log->log("locator/constraints",
                         rerun::TextLog(
                             "xMin: " + to_string(xMin) + " " +

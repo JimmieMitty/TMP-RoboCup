@@ -3,7 +3,8 @@
 #include "utils/math.h"
 #include "utils/print.h"
 
-BrainLog::BrainLog(Brain *argBrain) : enabled(false), brain(argBrain), rerunLog("robocup")
+BrainLog::BrainLog(Brain *argBrain) 
+    : enabled(false), brain(argBrain), rerunLog(brain->config->rerunLogServerAddr)  // initialize with server addr
 {
     if (!brain->config->rerunLogEnable)
     {
@@ -11,10 +12,10 @@ BrainLog::BrainLog(Brain *argBrain) : enabled(false), brain(argBrain), rerunLog(
         return;
     }
 
-    rerun::Error err = rerunLog.connect(brain->config->rerunLogServerAddr);
-    if (err.is_err())
+    // No need to call connect(), just check if the stream initialized successfully
+    if (!rerunLog.is_enabled())
     {
-        prtErr("Connect rerunLog server failed: " + err.description);
+        prtErr("Failed to initialize rerunLog with server: " + brain->config->rerunLogServerAddr);
         enabled = false;
         return;
     }
@@ -35,7 +36,7 @@ void BrainLog::setTimeSeconds(double seconds)
     if (!enabled)
         return;
 
-    rerunLog.set_time_seconds("time", seconds);
+    rerunLog.set_time_timestamp_secs_since_epoch("time", seconds);
 }
 
 void BrainLog::logStatics()
@@ -44,12 +45,33 @@ void BrainLog::logStatics()
         return;
 
     FieldDimensions &fieldDimensions = brain->config->fieldDimensions;
-    rerun::Collection<rerun::Vec2D> borders = {{-fieldDimensions.length / 2, -fieldDimensions.width / 2}, {fieldDimensions.length / 2, -fieldDimensions.width / 2}, {fieldDimensions.length / 2, fieldDimensions.width / 2}, {-fieldDimensions.length / 2, fieldDimensions.width / 2}, {-fieldDimensions.length / 2, -fieldDimensions.width / 2}};
+    rerun::Collection<rerun::Vec2D> borders = {
+        {-fieldDimensions.length / 2, -fieldDimensions.width / 2}, 
+        {fieldDimensions.length / 2, -fieldDimensions.width / 2}, 
+        {fieldDimensions.length / 2, fieldDimensions.width / 2}, 
+        {-fieldDimensions.length / 2, fieldDimensions.width / 2}, 
+        {-fieldDimensions.length / 2, -fieldDimensions.width / 2}};
     rerun::Collection<rerun::Vec2D> centerLine = {{0, -fieldDimensions.width / 2}, {0, fieldDimensions.width / 2}};
-    rerun::Collection<rerun::Vec2D> leftPenalty = {{-fieldDimensions.length / 2, fieldDimensions.penaltyAreaWidth / 2}, {-(fieldDimensions.length / 2 - fieldDimensions.penaltyAreaLength), fieldDimensions.penaltyAreaWidth / 2}, {-(fieldDimensions.length / 2 - fieldDimensions.penaltyAreaLength), -fieldDimensions.penaltyAreaWidth / 2}, {-fieldDimensions.length / 2, -fieldDimensions.penaltyAreaWidth / 2}};
-    rerun::Collection<rerun::Vec2D> rightPenalty = {{fieldDimensions.length / 2, fieldDimensions.penaltyAreaWidth / 2}, {(fieldDimensions.length / 2 - fieldDimensions.penaltyAreaLength), fieldDimensions.penaltyAreaWidth / 2}, {(fieldDimensions.length / 2 - fieldDimensions.penaltyAreaLength), -fieldDimensions.penaltyAreaWidth / 2}, {fieldDimensions.length / 2, -fieldDimensions.penaltyAreaWidth / 2}};
-    rerun::Collection<rerun::Vec2D> leftGoal = {{-fieldDimensions.length / 2, fieldDimensions.goalAreaWidth / 2}, {-(fieldDimensions.length / 2 - fieldDimensions.goalAreaLength), fieldDimensions.goalAreaWidth / 2}, {-(fieldDimensions.length / 2 - fieldDimensions.goalAreaLength), -fieldDimensions.goalAreaWidth / 2}, {-fieldDimensions.length / 2, -fieldDimensions.goalAreaWidth / 2}};
-    rerun::Collection<rerun::Vec2D> rightGoal = {{fieldDimensions.length / 2, fieldDimensions.goalAreaWidth / 2}, {(fieldDimensions.length / 2 - fieldDimensions.goalAreaLength), fieldDimensions.goalAreaWidth / 2}, {(fieldDimensions.length / 2 - fieldDimensions.goalAreaLength), -fieldDimensions.goalAreaWidth / 2}, {fieldDimensions.length / 2, -fieldDimensions.goalAreaWidth / 2}};
+    rerun::Collection<rerun::Vec2D> leftPenalty = {
+        {-fieldDimensions.length / 2, fieldDimensions.penaltyAreaWidth / 2}, 
+        {-(fieldDimensions.length / 2 - fieldDimensions.penaltyAreaLength), fieldDimensions.penaltyAreaWidth / 2}, 
+        {-(fieldDimensions.length / 2 - fieldDimensions.penaltyAreaLength), -fieldDimensions.penaltyAreaWidth / 2}, 
+        {-fieldDimensions.length / 2, -fieldDimensions.penaltyAreaWidth / 2}};
+    rerun::Collection<rerun::Vec2D> rightPenalty = {
+        {fieldDimensions.length / 2, fieldDimensions.penaltyAreaWidth / 2}, 
+        {(fieldDimensions.length / 2 - fieldDimensions.penaltyAreaLength), fieldDimensions.penaltyAreaWidth / 2}, 
+        {(fieldDimensions.length / 2 - fieldDimensions.penaltyAreaLength), -fieldDimensions.penaltyAreaWidth / 2}, 
+        {fieldDimensions.length / 2, -fieldDimensions.penaltyAreaWidth / 2}};
+    rerun::Collection<rerun::Vec2D> leftGoal = {
+        {-fieldDimensions.length / 2, fieldDimensions.goalAreaWidth / 2}, 
+        {-(fieldDimensions.length / 2 - fieldDimensions.goalAreaLength), fieldDimensions.goalAreaWidth / 2}, 
+        {-(fieldDimensions.length / 2 - fieldDimensions.goalAreaLength), -fieldDimensions.goalAreaWidth / 2}, 
+        {-fieldDimensions.length / 2, -fieldDimensions.goalAreaWidth / 2}};
+    rerun::Collection<rerun::Vec2D> rightGoal = {
+        {fieldDimensions.length / 2, fieldDimensions.goalAreaWidth / 2}, 
+        {(fieldDimensions.length / 2 - fieldDimensions.goalAreaLength), fieldDimensions.goalAreaWidth / 2}, 
+        {(fieldDimensions.length / 2 - fieldDimensions.goalAreaLength), -fieldDimensions.goalAreaWidth / 2}, 
+        {fieldDimensions.length / 2, -fieldDimensions.goalAreaWidth / 2}};
 
     vector<rerun::Vec2D> circle = {{fieldDimensions.circleRadius, 0}};
     for (int i = 0; i < 360; i++)

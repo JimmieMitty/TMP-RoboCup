@@ -43,7 +43,6 @@ def handle_configuration(context, *args, **kwargs):
             output='screen',
             parameters=[
                 config_file,
-                config_local_file,
                 config
             ]
         )

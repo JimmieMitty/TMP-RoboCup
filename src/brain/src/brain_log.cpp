@@ -12,15 +12,15 @@ BrainLog::BrainLog(Brain *argBrain)
         return;
     }
 
-    // No need to call connect(), just check if the stream initialized successfully
-    if (!rerunLog.is_enabled())
-    {
-        prtErr("Failed to initialize rerunLog with server: " + brain->config->rerunLogServerAddr);
+    try {
+        rerunLog.connect_grpc(brain->config->rerunLogServerAddr);
+        enabled = true;
+    } catch (const std::exception& e) {
+        prtErr("Failed to connect rerunLog with server: " + brain->config->rerunLogServerAddr);
+        prtErr(std::string("rerunLog exception: ") + e.what());
         enabled = false;
         return;
     }
-
-    enabled = true;
 }
 
 void BrainLog::setTimeNow()
@@ -106,7 +106,6 @@ void BrainLog::prepare()
 {
     if (!enabled)
         return;
-
     setTimeSeconds(0);
     setTimeNow();
     logStatics();

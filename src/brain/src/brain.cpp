@@ -23,8 +23,8 @@ Brain::Brain() : rclcpp::Node("brain_node")
     declare_parameter<double>("robot.vx_factor", 0.95);
     declare_parameter<double>("robot.yaw_offset", 0.1);
 
-    declare_parameter<bool>("rerunLog.enable", false);
-    declare_parameter<string>("rerunLog.server_addr", "");
+    declare_parameter<bool>("rerunLog.enable", true);
+    declare_parameter<string>("rerunLog.server_addr", "127.0.0.1:9876");
     declare_parameter<int>("rerunLog.img_interval", 10);
 
     declare_parameter<bool>("enable_com", true);

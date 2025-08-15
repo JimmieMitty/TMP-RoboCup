@@ -16,6 +16,6 @@ brain_node:
     enable_com: true
 
     rerunLog:
-      enable: false
-      server_addr: "127.0.0.1:9876"
+      enable: true
+      server_addr: "127.0.0.1:9876/proxy"
       img_interval: 1

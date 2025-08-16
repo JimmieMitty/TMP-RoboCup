@@ -3,4 +3,4 @@
 cd `dirname $0`
 cd ..
 
-colcon build --symlink-install $@
+colcon build  --symlink-install --parallel-workers $(nproc) $@

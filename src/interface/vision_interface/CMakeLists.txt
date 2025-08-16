@@ -10,6 +10,33 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
+find_package(Python COMPONENTS Interpreter REQUIRED)
+
+# detect virtualenv and set Pip args accordingly
+if(DEFINED ENV{VIRTUAL_ENV} OR DEFINED ENV{CONDA_PREFIX})
+  set(_pip_args)
+else()
+  set(_pip_args "--user")
+endif()
+
+# Specify the Python package version and installation arguments
+set(_pypkg "empy==3.3.4")
+set(_pip_args "--quiet")  # Optional: You can add flags like --quiet to suppress output
+
+# Install the Python package using execute_process
+execute_process(
+  COMMAND ${Python3_EXECUTABLE} -m pip install ${_pip_args} ${_pypkg}
+  RESULT_VARIABLE pip_result
+  OUTPUT_VARIABLE pip_output
+  ERROR_VARIABLE pip_error
+)
+
+# Check if installation was successful
+if(pip_result)
+  message(FATAL_ERROR "Failed to install Python package ${_pypkg}: ${pip_error}")
+else()
+  message(STATUS "Successfully installed Python package ${_pypkg}")
+endif()
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/DetectedObject.msg"

@@ -67,7 +67,7 @@ void Brain::init()
     imageSubscription = create_subscription<sensor_msgs::msg::Image>("/camera/camera/color/image_raw", 1, bind(&Brain::imageCallback, this, _1));
     headPoseSubscription = create_subscription<geometry_msgs::msg::Pose>("/head_pose", 1, bind(&Brain::headPoseCallback, this, _1));
     recoveryStateSubscription = create_subscription<booster_interface::msg::RawBytesMsg>("fall_down_recovery_state", 1, bind(&Brain::recoveryStateCallback, this, _1));
-
+    depthImageSubscription = create_subscription<sensor_msgs::msg::Image>("/camera/camera/depth/image_rect_raw", 1, bind(&Brain::depthImageCallback, this, _1));
 }
 
 void Brain::loadConfig()
@@ -544,6 +544,45 @@ void Brain::headPoseCallback(const geometry_msgs::msg::Pose &msg)
          rerun::Scalars(rerun::Collection<rerun::components::Scalar>{rerun::components::Scalar(pitch)}));
     log->log("head_to_base/yaw",
          rerun::Scalars(rerun::Collection<rerun::components::Scalar>{rerun::components::Scalar(yaw)}));
+    }
+}
+
+void Brain::depthImageCallback(const sensor_msgs::msg::Image &msg)
+{
+    if (!config->rerunLogEnable)
+        return;
+
+    static int counter = 0;
+    counter++;
+    if (counter % config->rerunLogImgInterval == 0)
+    {
+        // Assume 16UC1 or 32FC1 encoding for depth images
+        cv::Mat depth;
+        if (msg.encoding == "16UC1") {
+            depth = cv::Mat(msg.height, msg.width, CV_16UC1, const_cast<uint8_t *>(msg.data.data()));
+            depth.convertTo(depth, CV_32F); // convert to float for normalization
+        } else if (msg.encoding == "32FC1") {
+            depth = cv::Mat(msg.height, msg.width, CV_32FC1, const_cast<uint8_t *>(msg.data.data()));
+        } else {
+            prtErr("Unsupported depth image encoding: " + msg.encoding);
+            return;
+        }
+
+        // Normalize to [0, 10] meters, then map to [0, 255] for visualization
+        cv::Mat depthClipped;
+        cv::threshold(depth, depthClipped, 10.0, 10.0, cv::THRESH_TRUNC); // clip max to 10
+        cv::threshold(depthClipped, depthClipped, 0.0, 0.0, cv::THRESH_TOZERO); // clip min to 0
+
+        cv::Mat depth8U;
+        depthClipped.convertTo(depth8U, CV_8U, 255.0 / 10.0);
+
+        std::vector<uint8_t> compressed_image;
+        std::vector<int> compression_params = {cv::IMWRITE_JPEG_QUALITY, 50};
+        cv::imencode(".jpg", depth8U, compressed_image, compression_params);
+
+        double time = msg.header.stamp.sec + static_cast<double>(msg.header.stamp.nanosec) * 1e-9;
+        log->setTimeSeconds(time);
+        log->log("image/depth", rerun::EncodedImage::from_bytes(compressed_image));
     }
 }
 

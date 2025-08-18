@@ -91,6 +91,8 @@ private:
     void detectProcessMarkings(const vector<GameObject> &markingObjs);
     // 处理跌到爬起状态信息
     void recoveryStateCallback(const booster_interface::msg::RawBytesMsg &msg);
+    void depthImageCallback(const sensor_msgs::msg::Image &msg);
+
 
     rclcpp::Subscription<booster_interface::msg::RemoteControllerState>::SharedPtr joySubscription;
     rclcpp::Subscription<game_controller_interface::msg::GameControlData>::SharedPtr gameControlSubscription;
@@ -100,5 +102,6 @@ private:
     rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr imageSubscription;
     rclcpp::Subscription<geometry_msgs::msg::Pose>::SharedPtr headPoseSubscription;
     rclcpp::Subscription<booster_interface::msg::RawBytesMsg>::SharedPtr recoveryStateSubscription;
+    rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr depthImageSubscription;
 
 };

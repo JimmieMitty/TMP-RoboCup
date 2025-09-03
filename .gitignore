@@ -7,3 +7,4 @@ brain_local.yaml
 vision_local.yaml
 src/vision/model/model.engine
 scripts/vision/exported_model/model.wts
+src/rerun_logger/rerun_logger/__pycache__

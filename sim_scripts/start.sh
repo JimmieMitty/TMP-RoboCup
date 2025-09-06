@@ -1,17 +1,23 @@
 #!/bin/bash
 
+tmux kill-session -t sim
 
-ISAAC_SIM_PATH="/home/redbackbots/Workspace/booster/redbackbots-IsaacSim/Dockerfiles/IssacSim-Headless/start_ros2_local_isaac_sim.sh"
-BOOSTER_PATH="/home/redbackbots/booster-runner-full-0.0.11.run"
+# ISAAC_SIM_PATH="/home/redbackbots/Workspace/booster/redbackbots-IsaacSim/Dockerfiles/IssacSim-Headless/start_ros2_local_isaac_sim.sh"
+# BOOSTER_PATH="/home/redbackbots/booster-runner-full-0.0.11.run"
+
+ISAAC_SIM_PATH="/IssacSim-Headless/start_ros2_local_isaac_sim.sh"
+BOOSTER_PATH="/Runs/booster-runner-full-0.0.10.run"
+
 ISAAC_SIM_DIR="$(dirname "$ISAAC_SIM_PATH")"
 CUR_DIR="$(pwd)"
+echo $ISAAC_SIM_DIR
 
 # Start tmux session for Isaac Sim and Booster
 SESSION="sim"
 tmux has-session -t $SESSION 2>/dev/null
 if [ $? != 0 ]; then
 	tmux new-session -d -s $SESSION -c "$ISAAC_SIM_DIR" -n isaac_sim
-	tmux send-keys -t $SESSION:isaac_sim "$ISAAC_SIM_PATH" C-m
+	tmux send-keys -t $SESSION:isaac_sim "$ISAAC_SIM_PATH /isaac-sim/python.sh" C-m
 	tmux new-window -t $SESSION -n booster -c "$CUR_DIR"
 	tmux send-keys -t $SESSION:booster "sudo $BOOSTER_PATH" C-m
 else

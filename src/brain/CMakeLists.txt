@@ -20,7 +20,7 @@ find_package(geometry_msgs REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(behaviortree_cpp REQUIRED)
-find_package(rerun_sdk REQUIRED)
+# find_package(rerun_sdk REQUIRED)
 find_package(backward_ros REQUIRED)
 
 find_package(booster_interface REQUIRED)

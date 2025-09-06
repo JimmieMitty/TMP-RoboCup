@@ -1,13 +1,12 @@
 {
 	"name": "Isaac Sim DevContainer",
-	"image": "redbackbots/issac-robo-sim:latest",
-	"workspaceFolder": "/workspace",
+	"image": "issac-sim-robo",
+	"workspaceFolder": "/redbackbots",
 	"runArgs": [
 		"--runtime=nvidia",
 		"-e", "ACCEPT_EULA=Y",
-		"-e", "PUBLIC_IP=10.0.0.2",
-		"-v", "./:/workspace",
+		"-v", "./:/redbackbots",
 		"--gpus", "all",
-		"--network", "host"
+		"--privileged"
 	]
 }
